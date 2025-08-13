@@ -40,11 +40,11 @@ impl TokenBucket {
     }
 }
 
-pub struct SharedTokenBucket {
+pub struct TokenBucketShared {
     inner: Arc<Mutex<TokenBucket>>,
 }
 
-impl SharedTokenBucket {
+impl TokenBucketShared {
     pub fn new(capacity: u32, refill_rate: u32) -> Self {
         Self {
             inner: Arc::new(Mutex::new(TokenBucket::new(capacity, refill_rate))),

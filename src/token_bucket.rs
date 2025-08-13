@@ -1,4 +1,4 @@
 pub mod r#impl;
 pub mod tests;
 
-pub use r#impl::{SharedTokenBucket, TokenBucket};
+pub use r#impl::{TokenBucket, TokenBucketShared};

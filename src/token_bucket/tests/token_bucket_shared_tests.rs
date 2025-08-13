@@ -1,12 +1,12 @@
 #[cfg(test)]
 mod sequential_tests {
-    use crate::token_bucket::SharedTokenBucket;
+    use crate::token_bucket::TokenBucketShared;
     use std::thread;
     use std::time::Duration;
 
     #[test]
     fn try_acquire_basic() {
-        let bucket = SharedTokenBucket::new(10, 1);
+        let bucket = TokenBucketShared::new(10, 1);
 
         assert!(bucket.try_acquire(5));
         assert!(bucket.try_acquire(5));
@@ -16,7 +16,7 @@ mod sequential_tests {
 
     #[test]
     fn try_acquire_with_refill_after_delay() {
-        let bucket = SharedTokenBucket::new(10, 1);
+        let bucket = TokenBucketShared::new(10, 1);
         assert!(bucket.try_acquire(10));
 
         thread::sleep(Duration::from_secs(1));
@@ -27,7 +27,7 @@ mod sequential_tests {
 
 #[cfg(test)]
 mod parallel_tests {
-    use crate::token_bucket::SharedTokenBucket;
+    use crate::token_bucket::TokenBucketShared;
     use std::sync::Arc;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::thread;
@@ -35,7 +35,7 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_test() {
-        let bucket = SharedTokenBucket::new(10, 0);
+        let bucket = TokenBucketShared::new(10, 0);
         let bucket = Arc::new(bucket);
         let success_count = Arc::new(AtomicU32::new(0));
 
@@ -62,7 +62,7 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_with_refill() {
-        let bucket = SharedTokenBucket::new(5, 5);
+        let bucket = TokenBucketShared::new(5, 5);
         let bucket = Arc::new(bucket);
         let success_count = Arc::new(AtomicU32::new(0));
         let start = Instant::now();

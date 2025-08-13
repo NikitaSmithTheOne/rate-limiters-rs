@@ -3,10 +3,10 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
-use rate_limiters::token_bucket::SharedTokenBucket;
+use rate_limiters::token_bucket::TokenBucketShared;
 
 fn main() {
-    let bucket = Arc::new(SharedTokenBucket::new(10, 1));
+    let bucket = Arc::new(TokenBucketShared::new(10, 1));
 
     let mut handles = vec![];
     for i in 0..100 {
