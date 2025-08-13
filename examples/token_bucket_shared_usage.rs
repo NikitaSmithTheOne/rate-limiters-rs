@@ -1,4 +1,4 @@
-// cargo run --example shared_token_bucket_usage
+// cargo run --example token_bucket_shared_usage
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
