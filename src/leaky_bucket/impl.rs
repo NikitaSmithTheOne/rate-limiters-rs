@@ -3,6 +3,7 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 
 use crate::token_bucket::r#impl::{RateLimiter, RateLimiterShared};
 
+// *** LEAKY BUCKET ***
 pub struct LeakyBucket {
     capacity: u32,
     leak_rate: f64,
@@ -63,6 +64,7 @@ impl RateLimiter for LeakyBucket {
     }
 }
 
+// *** LEAKY BUCKET SHARED ***
 pub struct LeakyBucketShared {
     inner: Arc<Mutex<LeakyBucket>>,
 }
