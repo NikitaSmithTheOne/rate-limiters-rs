@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use std::time::Instant;
+use std::time::{Instant, UNIX_EPOCH};
 
 pub struct TokenBucket {
     capacity: u32,
@@ -37,6 +37,27 @@ impl TokenBucket {
         } else {
             false
         }
+    }
+
+    pub fn get_limit(&self) -> u32 {
+        self.capacity
+    }
+
+    pub fn get_remaining(&mut self) -> u32 {
+        self.refill();
+        self.tokens
+    }
+
+    pub fn get_used(&mut self) -> u32 {
+        self.refill();
+        self.capacity - self.tokens
+    }
+
+    pub fn get_reset(&self) -> u64 {
+        let now = std::time::SystemTime::now();
+        let refill_secs = (self.capacity - self.tokens) as f64 / self.refill_rate as f64;
+        let reset_time = now + std::time::Duration::from_secs_f64(refill_secs);
+        reset_time.duration_since(UNIX_EPOCH).unwrap().as_secs()
     }
 }
 
