@@ -3,7 +3,7 @@ mod sequential_tests {
     use std::thread;
     use std::time::Duration;
 
-    use crate::fixed_window_counter::FixedRateLimiter;
+    use crate::fixed_window_counter::FixedWindowCounter;
     use crate::token_bucket::r#impl::RateLimiter;
 
     #[test]
@@ -13,7 +13,7 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let mut bucket = FixedRateLimiter::new(10, 2);
+        let mut bucket = FixedWindowCounter::new(10, 2);
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);

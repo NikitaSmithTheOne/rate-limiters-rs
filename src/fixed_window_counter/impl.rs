@@ -3,15 +3,15 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 
 use crate::token_bucket::r#impl::{RateLimiter, RateLimiterShared};
 
-// *** FIXED RATE LIMITER ***
-pub struct FixedRateLimiter {
+// *** FIXED WINDOW COUNTER ***
+pub struct FixedWindowCounter {
     limit: u32,
     remaining: u32,
     window: Duration,
     last_reset: Instant,
 }
 
-impl FixedRateLimiter {
+impl FixedWindowCounter {
     pub fn new(limit: u32, window_secs: u64) -> Self {
         Self {
             limit,
@@ -22,7 +22,7 @@ impl FixedRateLimiter {
     }
 }
 
-impl RateLimiter for FixedRateLimiter {
+impl RateLimiter for FixedWindowCounter {
     fn refresh(&mut self) {
         let now = Instant::now();
         if now.duration_since(self.last_reset) >= self.window {
@@ -69,19 +69,19 @@ impl RateLimiter for FixedRateLimiter {
 }
 
 // *** FIXED RATE LIMITER SHARED ***
-pub struct FixedRateLimiterShared {
-    inner: Arc<Mutex<FixedRateLimiter>>,
+pub struct FixedWindowCounterShared {
+    inner: Arc<Mutex<FixedWindowCounter>>,
 }
 
-impl FixedRateLimiterShared {
+impl FixedWindowCounterShared {
     pub fn new(limit: u32, window_secs: u64) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(FixedRateLimiter::new(limit, window_secs))),
+            inner: Arc::new(Mutex::new(FixedWindowCounter::new(limit, window_secs))),
         }
     }
 }
 
-impl RateLimiterShared for FixedRateLimiterShared {
+impl RateLimiterShared for FixedWindowCounterShared {
     fn refresh(&self) {
         let mut limiter = self.inner.lock().unwrap();
         limiter.refresh()

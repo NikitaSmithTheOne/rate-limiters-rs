@@ -1,1 +1,2 @@
+mod fixed_window_counter_shared_tests;
 mod fixed_window_counter_tests;
