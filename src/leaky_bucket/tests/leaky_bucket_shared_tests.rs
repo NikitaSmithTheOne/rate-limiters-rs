@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod sequential_tests {
     use crate::leaky_bucket::LeakyBucketShared;
+    use crate::token_bucket::r#impl::RateLimiterShared;
     use std::thread;
     use std::time::Duration;
 
@@ -29,6 +30,7 @@ mod sequential_tests {
 #[cfg(test)]
 mod parallel_tests {
     use crate::leaky_bucket::LeakyBucketShared;
+    use crate::token_bucket::r#impl::RateLimiterShared;
     use std::sync::Arc;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::thread;

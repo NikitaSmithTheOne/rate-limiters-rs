@@ -29,6 +29,6 @@ fn main() {
             reset
         );
 
-        thread::sleep(Duration::from_millis(250));
+        thread::sleep(Duration::from_millis(300));
     }
 }

@@ -3,7 +3,7 @@ use std::time::{Instant, UNIX_EPOCH};
 
 // *** TOKEN BUCKET ***
 pub trait RateLimiter {
-    fn refill(&mut self);
+    fn refresh(&mut self);
     fn try_acquire(&mut self, tokens: u32) -> bool;
 
     fn get_limit(&self) -> u32;
@@ -31,7 +31,7 @@ impl TokenBucket {
 }
 
 impl RateLimiter for TokenBucket {
-    fn refill(&mut self) {
+    fn refresh(&mut self) {
         let now = Instant::now();
         let elapsed = now.duration_since(self.last_refill);
         let new_tokens = (elapsed.as_secs_f64() * self.refill_rate as f64).floor() as u32;
@@ -43,7 +43,7 @@ impl RateLimiter for TokenBucket {
     }
 
     fn try_acquire(&mut self, tokens: u32) -> bool {
-        self.refill();
+        self.refresh();
         if self.tokens >= tokens {
             self.tokens -= tokens;
             true
@@ -74,7 +74,7 @@ impl RateLimiter for TokenBucket {
 
 // *** TOKEN BUCKET SHARED ***
 pub trait RateLimiterShared {
-    fn refill(&self);
+    fn refresh(&self);
     fn try_acquire(&self, tokens: u32) -> bool;
 
     fn get_limit(&self) -> u32;
@@ -96,9 +96,9 @@ impl TokenBucketShared {
 }
 
 impl RateLimiterShared for TokenBucketShared {
-    fn refill(&self) {
+    fn refresh(&self) {
         let mut bucket = self.inner.lock().unwrap();
-        bucket.refill()
+        bucket.refresh()
     }
 
     fn try_acquire(&self, tokens: u32) -> bool {

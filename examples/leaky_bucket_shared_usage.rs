@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use rate_limiters::leaky_bucket::LeakyBucketShared;
+use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(LeakyBucketShared::new(10, 1.0));
