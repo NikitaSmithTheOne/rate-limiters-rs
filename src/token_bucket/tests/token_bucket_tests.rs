@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod sequential_tests {
     use crate::token_bucket::TokenBucket;
+    use crate::token_bucket::r#impl::RateLimiter;
     use std::thread;
     use std::time::Duration;
 
@@ -18,6 +19,7 @@ mod sequential_tests {
         assert!(bucket.get_reset() >= now_unix);
 
         assert!(bucket.try_acquire(5));
+        bucket.refill();
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 5);
         assert_eq!(bucket.get_used(), 5);
@@ -25,6 +27,7 @@ mod sequential_tests {
         assert!(diff <= 5 && diff >= 4);
 
         assert!(bucket.try_acquire(5));
+        bucket.refill();
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
@@ -32,6 +35,7 @@ mod sequential_tests {
         assert!(diff <= 10 && diff >= 9);
 
         assert!(!bucket.try_acquire(1));
+        bucket.refill();
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
@@ -39,6 +43,7 @@ mod sequential_tests {
         assert!(diff <= 10 && diff >= 9);
 
         thread::sleep(Duration::from_secs(1));
+        bucket.refill();
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 1);
         assert_eq!(bucket.get_used(), 9);

@@ -4,6 +4,7 @@ use std::thread;
 use std::time::Duration;
 
 use rate_limiters::token_bucket::TokenBucketShared;
+use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(TokenBucketShared::new(10, 1));

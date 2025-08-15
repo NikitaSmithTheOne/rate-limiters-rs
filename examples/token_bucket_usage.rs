@@ -3,6 +3,7 @@ use std::thread;
 use std::time::Duration;
 
 use rate_limiters::token_bucket::TokenBucket;
+use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
     let mut bucket = TokenBucket::new(10, 1);

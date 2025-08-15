@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod sequential_tests {
     use crate::token_bucket::TokenBucketShared;
+    use crate::token_bucket::r#impl::RateLimiterShared;
     use std::thread;
     use std::time::Duration;
 
@@ -28,6 +29,7 @@ mod sequential_tests {
 #[cfg(test)]
 mod parallel_tests {
     use crate::token_bucket::TokenBucketShared;
+    use crate::token_bucket::r#impl::RateLimiterShared;
     use std::sync::Arc;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::thread;
@@ -76,7 +78,8 @@ mod parallel_tests {
 
             let handle = thread::spawn(move || {
                 while Instant::now().duration_since(start) < duration {
-                    if bucket_clone.try_acquire(1) {
+                    let is_acquire = bucket_clone.try_acquire(1);
+                    if is_acquire {
                         counter_clone.fetch_add(1, Ordering::SeqCst);
                     }
                     thread::sleep(Duration::from_millis(50));
