@@ -1,2 +1,2 @@
-mod sliding_window_log_tests;
 mod sliding_window_log_shared_tests;
+mod sliding_window_log_tests;

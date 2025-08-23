@@ -56,13 +56,11 @@ impl RateLimiter for SlidingWindowLog {
             } else {
                 false
             }
+        } else if self.log.len() < self.capacity as usize {
+            self.log.push_back(Self::now_secs());
+            true
         } else {
-            if self.log.len() < self.capacity as usize {
-                self.log.push_back(Self::now_secs());
-                true
-            } else {
-                false
-            }
+            false
         }
     }
 
