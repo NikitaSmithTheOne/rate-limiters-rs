@@ -30,7 +30,7 @@ fn main() {
                     );
                 } else {
                     denied += 1;
-                    bucket_clone.refresh(); // <-- It must to get correct reset value w/ "jumping"
+                    bucket_clone.refresh(); // <-- It's must to get reset value w/ "jumping"
                     println!(
                         "[{elapsed:5.2}s] Client #{client_id} - Request #{req_id} - Rejected - Reset UNIX {}",
                         bucket_clone.get_reset()
