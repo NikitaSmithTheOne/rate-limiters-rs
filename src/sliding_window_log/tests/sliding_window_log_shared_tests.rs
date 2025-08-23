@@ -80,10 +80,10 @@ mod parallel_tests {
                     println!("[Thread {i}] acquired token");
                     success_count_clone.fetch_add(1, Ordering::SeqCst);
                 } else {
+                    println!("[Thread {i}] rejected");
                     let _ = bucket_clone.get_remaining();
                     let _ = bucket_clone.get_used();
                     let _ = bucket_clone.get_reset();
-                    println!("[Thread {i}] rejected");
                 }
             });
             handles.push(handle);

@@ -6,23 +6,46 @@ mod sequential_tests {
     use std::time::Duration;
 
     #[test]
-    fn try_acquire_basic() {
-        let bucket = FixedWindowCounterShared::new(10, 1);
+    fn basic_test() {
+        let now_unix = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+
+        let bucket = FixedWindowCounterShared::new(10, 2);
+        assert_eq!(bucket.get_limit(), 10);
+        assert_eq!(bucket.get_remaining(), 10);
+        assert_eq!(bucket.get_used(), 0);
+        assert!(bucket.get_reset() >= now_unix);
 
         assert!(bucket.try_acquire(5));
+        assert_eq!(bucket.get_limit(), 10);
+        assert_eq!(bucket.get_remaining(), 5);
+        assert_eq!(bucket.get_used(), 5);
+        let diff = bucket.get_reset() - now_unix;
+        assert_eq!(diff, 2);
+
         assert!(bucket.try_acquire(5));
+        assert_eq!(bucket.get_limit(), 10);
+        assert_eq!(bucket.get_remaining(), 0);
+        assert_eq!(bucket.get_used(), 10);
+        let diff = bucket.get_reset() - now_unix;
+        assert_eq!(diff, 2);
+
         assert!(!bucket.try_acquire(1));
-    }
+        assert_eq!(bucket.get_limit(), 10);
+        assert_eq!(bucket.get_remaining(), 0);
+        assert_eq!(bucket.get_used(), 10);
+        let diff = bucket.get_reset() - now_unix;
+        assert_eq!(diff, 2);
 
-    #[test]
-    fn try_acquire_with_refill_after_delay() {
-        let bucket = FixedWindowCounterShared::new(10, 1);
-        assert!(bucket.try_acquire(10));
-
-        thread::sleep(Duration::from_secs(1));
-        assert!(bucket.try_acquire(5));
-        assert!(bucket.try_acquire(5));
-        assert!(!bucket.try_acquire(1));
+        thread::sleep(Duration::from_secs(2));
+        bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
+        assert_eq!(bucket.get_limit(), 10);
+        assert_eq!(bucket.get_remaining(), 10);
+        assert_eq!(bucket.get_used(), 0);
+        let diff = bucket.get_reset() - now_unix;
+        assert_eq!(diff, 4);
     }
 }
 
@@ -30,69 +53,65 @@ mod sequential_tests {
 mod parallel_tests {
     use crate::token_bucket::TokenBucketShared;
     use crate::token_bucket::r#impl::RateLimiterShared;
-    use std::sync::Arc;
     use std::sync::atomic::{AtomicU32, Ordering};
+    use std::sync::{Arc, Barrier};
     use std::thread;
-    use std::time::{Duration, Instant};
+    use std::time::Duration;
 
     #[test]
     fn race_condition_test() {
-        let bucket = TokenBucketShared::new(10, 0);
-        let bucket = Arc::new(bucket);
+        let bucket = Arc::new(TokenBucketShared::new(10, 1));
         let success_count = Arc::new(AtomicU32::new(0));
+        let barrier = Arc::new(Barrier::new(21));
 
         let mut handles = vec![];
-        for _ in 0..20 {
+        for i in 0..20 {
             let bucket_clone = Arc::clone(&bucket);
-            let counter_clone = Arc::clone(&success_count);
+            let success_count_clone = Arc::clone(&success_count);
+            let barrier_clone = Arc::clone(&barrier);
 
             let handle = thread::spawn(move || {
+                println!("[Thread {i}] reached barrier");
+                barrier_clone.wait();
+                println!("[Thread {i}] started race");
+
                 if bucket_clone.try_acquire(1) {
-                    counter_clone.fetch_add(1, Ordering::SeqCst);
+                    println!("[Thread {i}] acquired token");
+                    success_count_clone.fetch_add(1, Ordering::SeqCst);
+                } else {
+                    println!("[Thread {i}] rejected");
+                    let _ = bucket_clone.get_remaining();
+                    let _ = bucket_clone.get_used();
+                    let _ = bucket_clone.get_reset();
                 }
             });
-
             handles.push(handle);
         }
+
+        println!("[Main] releasing barrier...");
+        barrier.wait();
+
         for handle in handles {
             handle.join().unwrap();
         }
 
         let result = success_count.load(Ordering::SeqCst);
-        assert_eq!(result, 10, "Race condition: {} tokens used!", result);
-    }
+        assert_eq!(result, 10, "Race condition: {} tokens acquired!", result);
 
-    #[test]
-    fn race_condition_with_refill() {
-        let bucket = TokenBucketShared::new(5, 5);
-        let bucket = Arc::new(bucket);
-        let success_count = Arc::new(AtomicU32::new(0));
-        let start = Instant::now();
-        let duration = Duration::from_secs(3);
+        assert_eq!(bucket.get_used(), 10);
+        assert_eq!(bucket.get_remaining(), 0);
 
-        let mut handles = vec![];
+        thread::sleep(Duration::from_secs(1));
+        bucket.refresh();
 
+        let mut success2 = 0;
         for _ in 0..10 {
-            let bucket_clone = Arc::clone(&bucket);
-            let counter_clone = Arc::clone(&success_count);
-
-            let handle = thread::spawn(move || {
-                while Instant::now().duration_since(start) < duration {
-                    let is_acquire = bucket_clone.try_acquire(1);
-                    if is_acquire {
-                        counter_clone.fetch_add(1, Ordering::SeqCst);
-                    }
-                    thread::sleep(Duration::from_millis(50));
-                }
-            });
-
-            handles.push(handle);
+            if bucket.try_acquire(1) {
+                success2 += 1;
+            }
         }
-        for handle in handles {
-            handle.join().unwrap();
-        }
-
-        let result = success_count.load(Ordering::SeqCst);
-        assert!(result <= 20, "More tokens used than expected: {}", result);
+        assert_eq!(success2, 1, "After reset should allow 1 new tokens");
+        assert_eq!(bucket.get_used(), 10);
+        assert_eq!(bucket.get_remaining(), 0);
     }
 }
