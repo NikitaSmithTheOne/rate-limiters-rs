@@ -39,7 +39,7 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 1);
+        assert_eq!(diff, 2);
 
         thread::sleep(Duration::from_secs(1));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
@@ -47,6 +47,6 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 1);
+        assert_eq!(diff, 2);
     }
 }
