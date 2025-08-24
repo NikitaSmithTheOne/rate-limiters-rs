@@ -1,22 +1,25 @@
 // cargo run --example token_bucket_usage
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use rate_limiters::token_bucket::TokenBucket;
 use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
-    let mut bucket = TokenBucket::new(10, 1);
+    let start = Instant::now();
+    let mut bucket = TokenBucket::new(5, 2);
 
     for i in 0..100 {
+        bucket.refresh();
         let limit = bucket.get_limit();
         let remaining = bucket.get_remaining();
         let used = bucket.get_used();
         let reset = bucket.get_reset();
         let is_acquired = bucket.try_acquire(1);
 
+        let elapsed = start.elapsed().as_secs_f32();
         println!(
-            "Request #{:03} | {:<12} | Limit: {:2} | Remaining: {:2} | Used: {:2} | Reset: {}",
+            "[{elapsed:5.2}s] Request #{:03} | {:<12} | Limit: {:2} | Remaining: {:2} | Used: {:2} | Reset: {}",
             i + 1,
             if is_acquired {
                 "Allowed"

@@ -1,4 +1,4 @@
-// cargo run --example sliding_window_log_usage
+// cargo run --example sliding_window_counter_shared_usage
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
