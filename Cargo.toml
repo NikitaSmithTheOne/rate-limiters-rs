@@ -2,5 +2,9 @@
 name = "rate_limiters"
 version = "0.1.0"
 edition = "2024"
+authors = ["Nikita Smith"]
+description = "Flexible and easy-to-use Rust library for implementing rate limits."
+license = "MIT"
+repository = "https://github.com/NikitaSmithTheOne/rate-limiters-rs"
 
 [dependencies]
