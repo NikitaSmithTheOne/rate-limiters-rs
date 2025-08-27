@@ -20,7 +20,7 @@ fn main() {
 
             for req_id in 0..20 {
                 let ok = bucket_clone.try_acquire(1);
-                
+
                 let elapsed = start.elapsed().as_secs_f32();
                 if ok {
                     allowed += 1;
