@@ -1,10 +1,11 @@
-## [unreleased]
+## [0.1.5] - 2025-08-30
 
 ### ⚙️ Miscellaneous Tasks
 
 - Try to fix changelog generation
 - Release rate_limiters version 0.1.4
 - Update scripts/pre_release.sh
+- Release rate_limiters version 0.1.5
 ## [0.1.3] - 2025-08-30
 
 ### 📚 Documentation
