@@ -32,6 +32,9 @@ release-major-dry:
 release-major:
 	make check_all && cargo release major --config ./release.toml -v --execute
 
+changelog:
+	git cliff -o CHANGELOG.md
+
 # *** PUBLISH ***
 # package:
 # 	make check_all && cargo package
