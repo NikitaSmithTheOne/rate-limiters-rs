@@ -1,4 +1,4 @@
-![Crates.io](https://img.shields.io/crates/v/rate-limiter)
+![Crates.io](https://img.shields.io/crates/v/rate-limiters)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 # rate-limiters-rs
