@@ -1,8 +1,8 @@
 .PHONY: tools
 
 # *** GENERAL ***
-tools:
-	./tools/install.sh
+install:
+	./scripts/install.sh
 
 build: 
 	cargo build
