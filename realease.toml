@@ -1,0 +1,7 @@
+# sign-commit = false
+# sign-tag = false
+# push = true
+# publish = true
+
+tag-prefix = "v"
+pre-release-hook = "git cliff -o CHANGELOG.md --tag {{version}}"
