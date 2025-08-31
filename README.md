@@ -5,12 +5,28 @@
 
 A `Rust` library implementing popular rate limiting algorithms with support for multithreaded usage.
 
+> ⭐ If you find this crate interesting or useful, please give it a star — it really helps!
+
 ---
 
 `README` versions:
 
 - **English:** [README.md](README.md)
 - **Русский:** [README_RU.md](README_RU.md)
+
+# Table of Contents
+
+- [Description](#description)
+- [Algorithm Explanations (Kid-Friendly)](#algorithm-explanations-kid-friendly)
+  - [`Leaky Bucket`](#leaky-bucket)
+  - [`Token Bucket`](#token-bucket)
+  - [`Fixed Window Counter`](#fixed-window-counter)
+  - [`Sliding Window Log`](#sliding-window-log)
+  - [`Sliding Window Counter`](#sliding-window-counter)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [`Leaky Bucket` example](#leaky-bucket-example)
+- [License](#license)
 
 # Description
 
@@ -21,16 +37,6 @@ This library provides simple and efficient implementations of `rate limiting` al
 - [`Fixed Window Counter`](./src/fixed_window_counter/impl.rs)
 - [`Sliding Window Log`](./src/sliding_window_log/impl.rs)
 - [`Sliding Window Counter`](./src/sliding_window_counter/impl.rs)
-
-# Installation
-
-```bash
-cargo add rate_limiters
-```
-
-# Usage
-
-All usage examples can be found in the [`examples`](./examples/) directory.
 
 ## Algorithm Explanations (Kid-Friendly)
 
@@ -71,7 +77,17 @@ Funny and easy-to-understand analogies that explain rate limiting algorithms.
 3. Each time you want a candy from the big basket, you check the sum of candies across all small baskets for the last N seconds.
 4. If the total is less than K — you take a candy and add it to the current small basket; otherwise, you have to wait.
 
-## Leaky Bucket
+# Installation
+
+```bash
+cargo add rate_limiters
+```
+
+# Usage
+
+All usage examples can be found in the [`examples`](./examples/) directory.
+
+## `Leaky Bucket` example
 
 Code example:
 

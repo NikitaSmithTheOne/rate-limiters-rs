@@ -5,12 +5,28 @@
 
 `Rust` библиотека c реализацией популярных алгоритмов ограничения скорости с поддержкой многопоточного использования.
 
+> ⭐ Если вам нравится этот пакет и он оказался полезным, поставьте, пожалуйста, звезду — это очень помогает!
+
 ---
 
 Версии `README`:
 
 - **English:** [README.md](README.md)
 - **Русский:** [README_RU.md](README_RU.md)
+
+# Содержание
+
+- [Описание](#описание)
+- [Объяснение алгоритмов (Доступное для детей)](#объяснение-алгоритмов-доступное-для-детей)
+  - [`Leaky Bucket`](#leaky-bucket)
+  - [`Token Bucket`](#token-bucket)
+  - [`Fixed Window Counter`](#fixed-window-counter)
+  - [`Sliding Window Log`](#sliding-window-log)
+  - [`Sliding Window Counter`](#sliding-window-counter)
+- [Установка](#установка)
+- [Использование](#использование)
+  - [Пример `Leaky Bucket`](#пример-leaky-bucket)
+- [Лицензия](#лицензия)
 
 # Описание
 
@@ -71,9 +87,7 @@ cargo add rate_limiters
 
 Все примеры использования можно посмотреть в директории [`examples`](./examples/).
 
-## Leaky Bucket
-
-Код:
+## Пример `Leaky Bucket`
 
 ```rs
 use std::thread;
