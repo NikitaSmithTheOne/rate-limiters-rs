@@ -4,4 +4,4 @@
 # publish = true
 
 tag-message= "chore: release {{crate_name}} version {{version}}"
-pre-release-hook = "scripts/pre_release.sh {{version}}"
+pre-release-hook = "sh -c 'echo Pre-Release Hook; git cliff -o CHANGELOG.md --tag {{version}}'"
