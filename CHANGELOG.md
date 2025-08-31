@@ -1,9 +1,17 @@
-## [unreleased]
+## [0.1.7] - 2025-08-31
+
+### 📚 Documentation
+
+- Add algorithm explanations to README files
+- Add table of contents to README files
 
 ### ⚙️ Miscellaneous Tasks
 
-- Update release.toml
-## [0.1.5] - 2025-08-30
+- Update release setup
+- Update release setup
+- Update release setup
+- Release rate_limiters version 0.1.7
+## [0.1.6] - 2025-08-30
 
 ### ⚙️ Miscellaneous Tasks
 
@@ -11,6 +19,8 @@
 - Release rate_limiters version 0.1.4
 - Update scripts/pre_release.sh
 - Release rate_limiters version 0.1.5
+- Update release.toml
+- Release rate_limiters version 0.1.6
 ## [0.1.3] - 2025-08-30
 
 ### 📚 Documentation
