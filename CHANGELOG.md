@@ -1,3 +1,14 @@
+## [0.1.8] - 2025-09-06
+
+### 📚 Documentation
+
+- Update README files and Cargo.toml detatils
+
+### ⚙️ Miscellaneous Tasks
+
+- Generate CHANGELOG.md file for v0.1.7
+- Update exclude in Cargo.toml
+- Release rate_limiters version 0.1.8
 ## [0.1.7] - 2025-08-31
 
 ### 📚 Documentation
