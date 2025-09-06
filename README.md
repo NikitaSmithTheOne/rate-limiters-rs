@@ -1,4 +1,5 @@
 ![Crates.io](https://img.shields.io/crates/v/rate-limiters)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/rate-limiters)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 # Popular `Rate Limiter` Algorithms for `Rust`

@@ -1,10 +1,17 @@
 [package]
 name = "rate_limiters"
 version = "0.1.7"
-edition = "2024"
-authors = ["Nikita Smith"]
+edition = "2021"
 description = "Flexible and easy-to-use Rust library for implementing rate limits."
 license = "MIT"
-repository = "https://github.com/NikitaSmithTheOne/rate-limiters-rs"
 
-[dependencies]
+authors = ["Nikita Smith"]
+repository = "https://github.com/NikitaSmithTheOne/rate-limiters-rs"
+homepage = "https://github.com/NikitaSmithTheOne/rate-limiters-rs"
+documentation = "https://docs.rs/rate_limiters"
+readme = "README.md"
+
+keywords = ["rate-limiter", "ratelimit", "throttle", "token-bucket", "sliding-window"]
+categories = ["algorithms", "concurrency", "network-programming", "asynchronous", "web-programming"]
+
+exclude = [".github", "examples/*", "target/*", "scripts/*"]

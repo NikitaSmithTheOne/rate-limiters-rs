@@ -51,8 +51,8 @@ mod sequential_tests {
 
 #[cfg(test)]
 mod parallel_tests {
-    use crate::token_bucket::TokenBucketShared;
     use crate::token_bucket::r#impl::RateLimiterShared;
+    use crate::token_bucket::TokenBucketShared;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Barrier};
     use std::thread;

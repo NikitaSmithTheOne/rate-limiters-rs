@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod sequential_tests {
-    use crate::token_bucket::TokenBucket;
     use crate::token_bucket::r#impl::RateLimiter;
+    use crate::token_bucket::TokenBucket;
     use std::thread;
     use std::time::Duration;
 

@@ -2,8 +2,8 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::token_bucket::TokenBucket;
 use rate_limiters::token_bucket::r#impl::RateLimiter;
+use rate_limiters::token_bucket::TokenBucket;
 
 fn main() {
     let start = Instant::now();
