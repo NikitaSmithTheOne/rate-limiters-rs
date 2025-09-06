@@ -1,6 +1,6 @@
 [package]
 name = "rate_limiters"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2021"
 description = "Flexible and easy-to-use Rust library for implementing rate limits."
 license = "MIT"
