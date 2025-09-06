@@ -14,4 +14,4 @@ readme = "README.md"
 keywords = ["rate-limiter", "ratelimit", "throttle", "token-bucket", "sliding-window"]
 categories = ["algorithms", "concurrency", "network-programming", "asynchronous", "web-programming"]
 
-exclude = [".github", "examples/*", "target/*", "scripts/*"]
+exclude = [".github", "target/*", "scripts/*"]
