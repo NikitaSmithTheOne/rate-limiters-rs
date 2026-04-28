@@ -1,7 +1,7 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, UNIX_EPOCH};
 
-use crate::token_bucket::r#impl::{RateLimiter, RateLimiterShared};
+use crate::traits::{RateLimiter, RateLimiterShared};
 
 // *** LEAKY BUCKET ***
 pub struct LeakyBucket {

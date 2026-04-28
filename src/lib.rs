@@ -3,3 +3,6 @@ pub mod leaky_bucket;
 pub mod sliding_window_counter;
 pub mod sliding_window_log;
 pub mod token_bucket;
+pub mod traits;
+
+pub use traits::{RateLimiter, RateLimiterShared};

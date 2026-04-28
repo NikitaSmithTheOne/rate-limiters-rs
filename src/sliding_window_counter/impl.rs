@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use crate::token_bucket::r#impl::{RateLimiter, RateLimiterShared};
+use crate::traits::{RateLimiter, RateLimiterShared};
 
 /// *** SLIDING WINDOW COUNTER ***
 pub struct SlidingWindowCounter {

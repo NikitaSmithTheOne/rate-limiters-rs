@@ -1,16 +1,7 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Instant, UNIX_EPOCH};
 
-// *** TOKEN BUCKET ***
-pub trait RateLimiter {
-    fn refresh(&mut self);
-    fn try_acquire(&mut self, tokens: u32) -> bool;
-
-    fn get_limit(&self) -> u32;
-    fn get_remaining(&self) -> u32;
-    fn get_used(&self) -> u32;
-    fn get_reset(&self) -> u64;
-}
+pub use crate::traits::{RateLimiter, RateLimiterShared};
 
 pub struct TokenBucket {
     capacity: u32,
@@ -73,17 +64,6 @@ impl RateLimiter for TokenBucket {
         let reset_time = now + std::time::Duration::from_secs_f64(refill_secs);
         reset_time.duration_since(UNIX_EPOCH).unwrap().as_secs()
     }
-}
-
-// *** TOKEN BUCKET SHARED ***
-pub trait RateLimiterShared {
-    fn refresh(&self);
-    fn try_acquire(&self, tokens: u32) -> bool;
-
-    fn get_limit(&self) -> u32;
-    fn get_remaining(&self) -> u32;
-    fn get_used(&self) -> u32;
-    fn get_reset(&self) -> u64;
 }
 
 pub struct TokenBucketShared {
