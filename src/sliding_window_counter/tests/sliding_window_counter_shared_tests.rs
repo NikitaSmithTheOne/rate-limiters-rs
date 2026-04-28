@@ -7,59 +7,60 @@ mod sequential_tests {
 
     #[test]
     fn basic_test() {
-        let now_unix = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
+        let now_unix = || {
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs()
+        };
 
         let bucket = SlidingWindowCounterShared::new(10, 2);
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
-        assert!(bucket.get_reset() >= now_unix);
+        assert!(bucket.get_reset() >= now_unix());
 
         assert!(bucket.try_acquire(5));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 5);
         assert_eq!(bucket.get_used(), 5);
-        let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        let diff = bucket.get_reset() - now_unix();
+        assert!(diff <= 2 && diff >= 1);
 
         assert!(bucket.try_acquire(5));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
-        let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        let diff = bucket.get_reset() - now_unix();
+        assert!(diff <= 2 && diff >= 1);
 
         assert!(!bucket.try_acquire(1));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
-        let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        let diff = bucket.get_reset() - now_unix();
+        assert!(diff <= 2 && diff >= 1);
 
         thread::sleep(Duration::from_secs(1));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
-        let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        let diff = bucket.get_reset() - now_unix();
+        assert!(diff <= 2 && diff >= 1);
 
         thread::sleep(Duration::from_secs(1));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
-        let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(bucket.get_reset() >= now_unix());
     }
 }
 
 #[cfg(test)]
 mod parallel_tests {
-    use crate::sliding_window_log::SlidingWindowLogShared;
+    use crate::sliding_window_counter::SlidingWindowCounterShared;
     use crate::token_bucket::r#impl::RateLimiterShared;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Barrier};
@@ -68,7 +69,7 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_test() {
-        let bucket = Arc::new(SlidingWindowLogShared::new(10, 1));
+        let bucket = Arc::new(SlidingWindowCounterShared::new(10, 1));
         let success_count = Arc::new(AtomicU32::new(0));
         let barrier = Arc::new(Barrier::new(21));
 

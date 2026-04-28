@@ -7,43 +7,76 @@ use crate::token_bucket::r#impl::{RateLimiter, RateLimiterShared};
 /// *** SLIDING WINDOW COUNTER ***
 pub struct SlidingWindowCounter {
     capacity: u32,
-    window: Duration,
-    events: VecDeque<Instant>,
+    tick: Duration,
+    slots: VecDeque<u32>,
+    used: u32,
+    last_tick: Instant,
 }
 
 impl SlidingWindowCounter {
     pub fn new(capacity: u32, window_secs: u64) -> Self {
+        let window_secs = window_secs.max(1);
+        let tick = Duration::from_secs(1);
+        let slot_count = window_secs as usize;
+
         Self {
             capacity,
-            window: Duration::from_secs(window_secs),
-            events: VecDeque::new(),
+            tick,
+            slots: VecDeque::from(vec![0; slot_count]),
+            used: 0,
+            last_tick: Instant::now(),
         }
     }
 
-    fn purge_old(&mut self) {
+    fn now_unix() -> u64 {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    }
+
+    fn advance_ticks(&mut self) {
         let now = Instant::now();
-        while let Some(&front) = self.events.front() {
-            if now.duration_since(front) > self.window {
-                self.events.pop_front();
-            } else {
-                break;
+        let elapsed = now.duration_since(self.last_tick);
+        let ticks = (elapsed.as_secs_f64() / self.tick.as_secs_f64()).floor() as u64;
+
+        if ticks == 0 {
+            return;
+        }
+
+        let step = std::cmp::min(ticks as usize, self.slots.len());
+        for _ in 0..step {
+            if let Some(expired) = self.slots.pop_front() {
+                self.used = self.used.saturating_sub(expired);
+            }
+            self.slots.push_back(0);
+        }
+
+        // If we advanced more than the number of slots, everything expired.
+        if ticks as usize > step {
+            self.used = 0;
+            for slot in self.slots.iter_mut() {
+                *slot = 0;
             }
         }
+
+        // Keep the reference point close to now to avoid drift.
+        self.last_tick = now;
     }
 }
 
 impl RateLimiter for SlidingWindowCounter {
     fn refresh(&mut self) {
-        self.purge_old();
+        self.advance_ticks();
     }
 
     fn try_acquire(&mut self, tokens: u32) -> bool {
         self.refresh();
-        if (self.events.len() as u32 + tokens) <= self.capacity {
-            let now = Instant::now();
-            for _ in 0..tokens {
-                self.events.push_back(now);
+        if self.used.saturating_add(tokens) <= self.capacity {
+            if let Some(cur) = self.slots.back_mut() {
+                *cur = cur.saturating_add(tokens);
             }
+            self.used = self.used.saturating_add(tokens);
             true
         } else {
             false
@@ -55,27 +88,28 @@ impl RateLimiter for SlidingWindowCounter {
     }
 
     fn get_remaining(&self) -> u32 {
-        if (self.events.len() as u32) >= self.capacity {
-            0
-        } else {
-            self.capacity - self.events.len() as u32
-        }
+        self.capacity.saturating_sub(self.used)
     }
 
     fn get_used(&self) -> u32 {
-        self.events.len() as u32
+        self.used
     }
 
     fn get_reset(&self) -> u64 {
-        if let Some(&first) = self.events.front() {
-            let expire = first + self.window;
-            let reset_time = SystemTime::now() + expire.saturating_duration_since(Instant::now());
-            reset_time.duration_since(UNIX_EPOCH).unwrap().as_secs()
+        if self.used == 0 {
+            return Self::now_unix();
+        }
+
+        // Reset is when the oldest non-zero slot expires (aligns with SlidingWindowLog semantics).
+        if let Some((idx, _)) = self
+            .slots
+            .iter()
+            .enumerate()
+            .find(|(_, &count)| count > 0)
+        {
+            Self::now_unix() + (idx as u64 + 1)
         } else {
-            SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
+            Self::now_unix()
         }
     }
 }

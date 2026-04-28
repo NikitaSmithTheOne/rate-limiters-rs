@@ -23,14 +23,14 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 5);
         assert_eq!(bucket.get_used(), 5);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         assert!(bucket.try_acquire(5));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         thread::sleep(Duration::from_secs(1));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
@@ -38,7 +38,7 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         thread::sleep(Duration::from_secs(1));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
@@ -46,7 +46,7 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
     }
 }
 

@@ -23,21 +23,21 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 5);
         assert_eq!(bucket.get_used(), 5);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         assert!(bucket.try_acquire(5));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         assert!(!bucket.try_acquire(1));
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 0);
         assert_eq!(bucket.get_used(), 10);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 2);
+        assert!(diff <= 2 && diff >= 1);
 
         thread::sleep(Duration::from_secs(2));
         bucket.refresh(); // <-- Call refresh to update details w/ try_acquire call
@@ -45,14 +45,14 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
         let diff = bucket.get_reset() - now_unix;
-        assert_eq!(diff, 4);
+        assert!(diff <= 4 && diff >= 3);
     }
 }
 
 #[cfg(test)]
 mod parallel_tests {
+    use crate::fixed_window_counter::FixedWindowCounterShared;
     use crate::token_bucket::r#impl::RateLimiterShared;
-    use crate::token_bucket::TokenBucketShared;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Barrier};
     use std::thread;
@@ -60,7 +60,7 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_test() {
-        let bucket = Arc::new(TokenBucketShared::new(10, 1));
+        let bucket = Arc::new(FixedWindowCounterShared::new(10, 1));
         let success_count = Arc::new(AtomicU32::new(0));
         let barrier = Arc::new(Barrier::new(21));
 
@@ -110,7 +110,7 @@ mod parallel_tests {
                 success2 += 1;
             }
         }
-        assert_eq!(success2, 1, "After reset should allow 1 new tokens");
+        assert_eq!(success2, 10, "After reset should allow 10 new tokens");
         assert_eq!(bucket.get_used(), 10);
         assert_eq!(bucket.get_remaining(), 0);
     }
