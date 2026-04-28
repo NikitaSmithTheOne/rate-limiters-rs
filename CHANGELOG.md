@@ -1,3 +1,25 @@
+## [0.1.11] - 2026-04-28
+
+### 🐛 Bug Fixes
+
+- Update leaky and token bucket algos
+- Update sliding window counter implementation
+
+### 🚜 Refactor
+
+- Outsource traits into separate file
+
+### 📚 Documentation
+
+- Update README
+
+### ⚙️ Miscellaneous Tasks
+
+- Generate CHANGELOG.md file for v0.1.8
+- Fix check_all script errors
+- Release rate_limiters version 0.1.9
+- Release rate_limiters version 0.1.10
+- Release rate_limiters version 0.1.11
 ## [0.1.8] - 2025-09-06
 
 ### 📚 Documentation
