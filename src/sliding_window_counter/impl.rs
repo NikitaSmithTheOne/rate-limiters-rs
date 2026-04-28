@@ -101,12 +101,7 @@ impl RateLimiter for SlidingWindowCounter {
         }
 
         // Reset is when the oldest non-zero slot expires (aligns with SlidingWindowLog semantics).
-        if let Some((idx, _)) = self
-            .slots
-            .iter()
-            .enumerate()
-            .find(|(_, &count)| count > 0)
-        {
+        if let Some((idx, _)) = self.slots.iter().enumerate().find(|(_, &count)| count > 0) {
             Self::now_unix() + (idx as u64 + 1)
         } else {
             Self::now_unix()

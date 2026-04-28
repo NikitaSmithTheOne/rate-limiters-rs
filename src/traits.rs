@@ -19,4 +19,3 @@ pub trait RateLimiterShared {
     fn get_used(&self) -> u32;
     fn get_reset(&self) -> u64;
 }
-
