@@ -58,6 +58,9 @@ impl RateLimiter for LeakyBucket {
 
     fn get_reset(&self) -> u64 {
         let now = std::time::SystemTime::now();
+        if self.leak_rate <= 0.0 {
+            return u64::MAX;
+        }
         let seconds = self.water / self.leak_rate;
         let reset_time = now + Duration::from_secs_f64(seconds);
         reset_time.duration_since(UNIX_EPOCH).unwrap().as_secs()

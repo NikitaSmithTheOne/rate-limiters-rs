@@ -66,6 +66,9 @@ impl RateLimiter for TokenBucket {
 
     fn get_reset(&self) -> u64 {
         let now = std::time::SystemTime::now();
+        if self.refill_rate == 0 {
+            return u64::MAX;
+        }
         let refill_secs = (self.capacity - self.tokens) as f64 / self.refill_rate as f64;
         let reset_time = now + std::time::Duration::from_secs_f64(refill_secs);
         reset_time.duration_since(UNIX_EPOCH).unwrap().as_secs()

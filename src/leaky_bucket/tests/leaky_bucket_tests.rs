@@ -52,4 +52,21 @@ mod sequential_tests {
         assert_eq!(bucket.get_remaining(), 2);
         assert_eq!(bucket.get_used(), 8);
     }
+
+    #[test]
+    fn zero_leak_rate_never_resets() {
+        let mut bucket = LeakyBucket::new(3, 0.0);
+        assert!(bucket.try_acquire(3));
+        assert!(!bucket.try_acquire(1));
+        bucket.refresh();
+
+        assert_eq!(bucket.get_remaining(), 0);
+        assert_eq!(bucket.get_used(), 3);
+        assert_eq!(bucket.get_reset(), u64::MAX);
+
+        thread::sleep(Duration::from_secs(1));
+        bucket.refresh();
+        assert_eq!(bucket.get_remaining(), 0);
+        assert_eq!(bucket.get_reset(), u64::MAX);
+    }
 }
