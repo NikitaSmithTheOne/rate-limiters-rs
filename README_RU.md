@@ -1,5 +1,5 @@
-![Crates.io](https://img.shields.io/crates/v/rate-limiters)
-![Crates.io Total Downloads](https://img.shields.io/crates/d/rate-limiters)
+![Crates.io](https://img.shields.io/crates/v/rate_limiters)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/rate_limiters)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 # Популярные `Rate Limiter` алгоритмы для `Rust`
@@ -95,7 +95,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::leaky_bucket::LeakyBucket;
-use rate_limiters::token_bucket::r#impl::RateLimiter;
+use rate_limiters::RateLimiter;
 
 fn main() {
     let start = Instant::now();
