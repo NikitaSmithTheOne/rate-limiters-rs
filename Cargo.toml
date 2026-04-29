@@ -22,3 +22,19 @@ criterion = "0.8"
 [[bench]]
 name = "token_bucket"
 harness = false
+
+[[bench]]
+name = "leaky_bucket"
+harness = false
+
+[[bench]]
+name = "fixed_window_counter"
+harness = false
+
+[[bench]]
+name = "sliding_window_log"
+harness = false
+
+[[bench]]
+name = "sliding_window_counter"
+harness = false
