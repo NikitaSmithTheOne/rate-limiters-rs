@@ -49,4 +49,35 @@ mod sequential_tests {
         let diff = bucket.get_reset() - now_unix;
         assert!(diff <= 2 && diff >= 1);
     }
+
+    #[test]
+    fn get_reset_skips_stale_entries_without_refresh() {
+        // Regression: get_reset() used to return `oldest + window` even when
+        // the oldest entries had aged past the window — yielding a timestamp
+        // in the past. It now skips stale entries inline.
+        let mut bucket = SlidingWindowLog::new(5, 2);
+        assert!(bucket.try_acquire(3));
+
+        thread::sleep(Duration::from_secs(3));
+
+        let now_unix = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        // Intentionally do NOT call refresh — caller's get_reset() should
+        // still return a sensible (non-past) value.
+        let reset = bucket.get_reset();
+        assert!(
+            reset >= now_unix,
+            "get_reset returned a past timestamp: {} < now {}",
+            reset,
+            now_unix
+        );
+        assert!(
+            reset <= now_unix + 1,
+            "get_reset returned a value too far in the future: {} > now {}",
+            reset,
+            now_unix
+        );
+    }
 }

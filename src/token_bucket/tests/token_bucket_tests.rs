@@ -53,6 +53,29 @@ mod sequential_tests {
     }
 
     #[test]
+    fn refresh_does_not_drift_at_subtick_intervals() {
+        // Regression: refresh() used to set last_refill = now, discarding the
+        // sub-token fraction of elapsed time. Over many sub-tick refreshes the
+        // effective refill rate fell well below the configured rate.
+        let mut bucket = TokenBucket::new(20, 1);
+        assert!(bucket.try_acquire(20)); // drain
+        assert_eq!(bucket.get_remaining(), 0);
+
+        // Three cycles of 1.7s = ~5.1s real time. At rate 1/s the bucket
+        // should accumulate 5 tokens (1 + 2 + 2 across the three refreshes).
+        // The buggy version generated only 1 per cycle = 3 total.
+        for _ in 0..3 {
+            thread::sleep(Duration::from_millis(1700));
+            bucket.refresh();
+        }
+        assert!(
+            bucket.get_remaining() >= 5,
+            "drift regression: expected >= 5 tokens after ~5.1s, got {}",
+            bucket.get_remaining()
+        );
+    }
+
+    #[test]
     fn zero_refill_rate_never_resets() {
         let mut bucket = TokenBucket::new(3, 0);
         assert!(bucket.try_acquire(3));

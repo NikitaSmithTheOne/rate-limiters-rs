@@ -46,18 +46,11 @@ impl RateLimiter for SlidingWindowLog {
 
     fn try_acquire(&mut self, tokens: u32) -> bool {
         self.cleanup();
-        if tokens != 1 {
-            if self.log.len() + tokens as usize <= self.capacity as usize {
-                let now = Self::now_secs();
-                for _ in 0..tokens {
-                    self.log.push_back(now);
-                }
-                true
-            } else {
-                false
+        if self.log.len() + tokens as usize <= self.capacity as usize {
+            let now = Self::now_secs();
+            for _ in 0..tokens {
+                self.log.push_back(now);
             }
-        } else if self.log.len() < self.capacity as usize {
-            self.log.push_back(Self::now_secs());
             true
         } else {
             false
@@ -77,11 +70,16 @@ impl RateLimiter for SlidingWindowLog {
     }
 
     fn get_reset(&self) -> u64 {
-        if let Some(&oldest) = self.log.front() {
-            oldest + self.window.as_secs()
-        } else {
-            Self::now_secs()
+        // Skip stale entries inline so callers get an accurate reset even if
+        // refresh() wasn't called first.
+        let now = Self::now_secs();
+        let window = self.window.as_secs();
+        for &ts in self.log.iter() {
+            if now.saturating_sub(ts) < window {
+                return ts + window;
+            }
         }
+        now
     }
 }
 

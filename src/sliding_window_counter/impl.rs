@@ -36,8 +36,7 @@ impl SlidingWindowCounter {
     }
 
     fn advance_ticks(&mut self) {
-        let now = Instant::now();
-        let elapsed = now.duration_since(self.last_tick);
+        let elapsed = Instant::now().duration_since(self.last_tick);
         let ticks = (elapsed.as_secs_f64() / self.tick.as_secs_f64()).floor() as u64;
 
         if ticks == 0 {
@@ -60,8 +59,9 @@ impl SlidingWindowCounter {
             }
         }
 
-        // Keep the reference point close to now to avoid drift.
-        self.last_tick = now;
+        // Advance by the exact time consumed by whole ticks so sub-tick
+        // fractions are preserved across calls (prevents tick drift).
+        self.last_tick += Duration::from_secs(ticks);
     }
 }
 
@@ -96,16 +96,29 @@ impl RateLimiter for SlidingWindowCounter {
     }
 
     fn get_reset(&self) -> u64 {
+        let now_unix = Self::now_unix();
         if self.used == 0 {
-            return Self::now_unix();
+            return now_unix;
         }
 
-        // Reset is when the oldest non-zero slot expires (aligns with SlidingWindowLog semantics).
-        if let Some((idx, _)) = self.slots.iter().enumerate().find(|(_, &count)| count > 0) {
-            Self::now_unix() + (idx as u64 + 1)
-        } else {
-            Self::now_unix()
+        // Slot at index `i` expires at `last_tick + (i + 1) * tick`. Anchor on
+        // `last_tick` (not `now`) so callers don't have to refresh() first to
+        // get an accurate value, and skip slots whose expiry is already past.
+        let now_instant = Instant::now();
+        for (idx, &count) in self.slots.iter().enumerate() {
+            if count == 0 {
+                continue;
+            }
+            let expiry = self.last_tick + Duration::from_secs(idx as u64 + 1);
+            if expiry > now_instant {
+                // Round any sub-second remainder up to the next whole second so
+                // a slot that expires moments from now never reports "0".
+                let delta = expiry.duration_since(now_instant);
+                let secs = delta.as_secs() + (delta.subsec_nanos() > 0) as u64;
+                return now_unix + secs;
+            }
         }
+        now_unix
     }
 }
 

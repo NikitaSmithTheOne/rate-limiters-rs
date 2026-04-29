@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use std::time::{Instant, UNIX_EPOCH};
+use std::time::{Duration, Instant, UNIX_EPOCH};
 
 pub use crate::traits::{RateLimiter, RateLimiterShared};
 
@@ -23,13 +23,18 @@ impl TokenBucket {
 
 impl RateLimiter for TokenBucket {
     fn refresh(&mut self) {
-        let now = Instant::now();
-        let elapsed = now.duration_since(self.last_refill);
+        if self.refill_rate == 0 {
+            return;
+        }
+        let elapsed = Instant::now().duration_since(self.last_refill);
         let new_tokens = (elapsed.as_secs_f64() * self.refill_rate as f64).floor() as u32;
 
         if new_tokens > 0 {
             self.tokens = std::cmp::min(self.capacity, self.tokens + new_tokens);
-            self.last_refill = now;
+            // Advance last_refill by exactly the time the new tokens represent
+            // so any sub-token fraction is preserved (prevents drift across calls).
+            self.last_refill +=
+                Duration::from_secs_f64(new_tokens as f64 / self.refill_rate as f64);
         }
     }
 
