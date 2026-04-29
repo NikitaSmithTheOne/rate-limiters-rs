@@ -15,3 +15,10 @@ keywords = ["rate-limiter", "ratelimit", "throttle", "token-bucket", "sliding-wi
 categories = ["algorithms", "concurrency", "network-programming", "asynchronous", "web-programming"]
 
 exclude = [".github", "target/*", "scripts/*"]
+
+[dev-dependencies]
+criterion = "0.8"
+
+[[bench]]
+name = "token_bucket"
+harness = false

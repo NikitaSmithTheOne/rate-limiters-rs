@@ -1,4 +1,4 @@
-.PHONY: tools
+.PHONY: tools bench bench-one bench-quick bench-filter
 
 # *** GENERAL ***
 install:
@@ -10,8 +10,25 @@ build:
 test: 
 	cargo test
 
-check_all: 
+check_all:
 	cargo clippy && cargo fmt --check && cargo test
+
+# *** BENCHMARKS ***
+# Run all benchmarks
+bench:
+	cargo bench
+
+# Run benchmarks for a single algorithm, e.g. `make bench-one BENCH=token_bucket`
+bench-one:
+	cargo bench --bench $(BENCH)
+
+# Quick smoke run with reduced sample count, e.g. `make bench-quick BENCH=token_bucket`
+bench-quick:
+	cargo bench --bench $(BENCH) -- --quick
+
+# Filter benchmarks by ID regex, e.g. `make bench-filter BENCH=token_bucket FILTER=TokenBucket/refresh`
+bench-filter:
+	cargo bench --bench $(BENCH) -- "$(FILTER)"
 
 # *** RELEASE ***
 release-patch-dry:
