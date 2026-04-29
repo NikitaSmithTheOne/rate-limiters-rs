@@ -1,3 +1,22 @@
+## [0.1.12] - 2026-04-29
+
+### 🐛 Bug Fixes
+
+- Update implementations
+
+### 📚 Documentation
+
+- Update CHANGELOG
+
+### ⚡ Performance
+
+- Add benchmarks for token bucket
+- Add benchmarks for all other implementations
+
+### ⚙️ Miscellaneous Tasks
+
+- Fix check_all
+- Release rate_limiters version 0.1.12
 ## [0.1.11] - 2026-04-28
 
 ### 🐛 Bug Fixes
