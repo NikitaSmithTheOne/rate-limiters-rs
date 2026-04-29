@@ -31,13 +31,17 @@ fn bench_try_acquire_rejected(c: &mut Criterion) {
 fn bench_refresh(c: &mut Criterion) {
     let mut group = c.benchmark_group("FixedWindowCounter/refresh");
     for &window in &[1u64, 60, u64::MAX] {
-        group.bench_with_input(BenchmarkId::from_parameter(window), &window, |b, &window| {
-            let mut limiter = FixedWindowCounter::new(u32::MAX, window);
-            b.iter(|| {
-                limiter.refresh();
-                black_box(&limiter);
-            });
-        });
+        group.bench_with_input(
+            BenchmarkId::from_parameter(window),
+            &window,
+            |b, &window| {
+                let mut limiter = FixedWindowCounter::new(u32::MAX, window);
+                b.iter(|| {
+                    limiter.refresh();
+                    black_box(&limiter);
+                });
+            },
+        );
     }
     group.finish();
 }
