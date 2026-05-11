@@ -1,3 +1,17 @@
+## [0.1.13] - 2026-05-11
+
+### 🚜 Refactor
+
+- Pass constructor params via config structs
+
+### 📚 Documentation
+
+- Update CHANGELOG
+- Import traits from crate root and fix README snippet
+
+### ⚙️ Miscellaneous Tasks
+
+- Release rate_limiters version 0.1.13
 ## [0.1.12] - 2026-04-29
 
 ### 🐛 Bug Fixes
