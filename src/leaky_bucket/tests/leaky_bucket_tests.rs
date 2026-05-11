@@ -3,7 +3,7 @@ mod sequential_tests {
     use std::thread;
     use std::time::Duration;
 
-    use crate::leaky_bucket::LeakyBucket;
+    use crate::leaky_bucket::{LeakyBucket, LeakyBucketConfig};
     use crate::token_bucket::r#impl::RateLimiter;
 
     #[test]
@@ -13,7 +13,10 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let mut bucket = LeakyBucket::new(10, 1.0);
+        let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+            capacity: 10,
+            leak_rate: 1.0,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -55,7 +58,10 @@ mod sequential_tests {
 
     #[test]
     fn zero_leak_rate_never_resets() {
-        let mut bucket = LeakyBucket::new(3, 0.0);
+        let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+            capacity: 3,
+            leak_rate: 0.0,
+        });
         assert!(bucket.try_acquire(3));
         assert!(!bucket.try_acquire(1));
         bucket.refresh();

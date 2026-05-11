@@ -99,7 +99,7 @@ use rate_limiters::RateLimiter;
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = LeakyBucket::new(3, 1.0);
+    let mut bucket = LeakyBucket::new(LeakyBucketConfig { capacity: 3, leak_rate: 1.0 });
 
     for i in 0..100 {
         bucket.refresh();

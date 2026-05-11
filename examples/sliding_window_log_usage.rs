@@ -2,12 +2,15 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::sliding_window_log::SlidingWindowLog;
+use rate_limiters::sliding_window_log::{SlidingWindowLog, SlidingWindowLogConfig};
 use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = SlidingWindowLog::new(10, 5);
+    let mut bucket = SlidingWindowLog::new(SlidingWindowLogConfig {
+        capacity: 10,
+        window_secs: 5,
+    });
 
     for i in 0..100 {
         bucket.refresh();

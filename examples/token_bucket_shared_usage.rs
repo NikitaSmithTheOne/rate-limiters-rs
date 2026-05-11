@@ -4,10 +4,13 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::token_bucket::r#impl::RateLimiterShared;
-use rate_limiters::token_bucket::TokenBucketShared;
+use rate_limiters::token_bucket::{TokenBucketConfig, TokenBucketShared};
 
 fn main() {
-    let bucket = Arc::new(TokenBucketShared::new(10, 1));
+    let bucket = Arc::new(TokenBucketShared::new(TokenBucketConfig {
+        capacity: 10,
+        refill_rate: 1,
+    }));
 
     let start = Instant::now();
     let mut handles = vec![];

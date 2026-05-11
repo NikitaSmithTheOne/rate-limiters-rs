@@ -3,11 +3,18 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::sliding_window_counter::SlidingWindowCounterShared;
+use rate_limiters::sliding_window_counter::{
+    SlidingWindowCounterConfig, SlidingWindowCounterShared,
+};
 use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
-    let bucket = Arc::new(SlidingWindowCounterShared::new(10, 3));
+    let bucket = Arc::new(SlidingWindowCounterShared::new(
+        SlidingWindowCounterConfig {
+            capacity: 10,
+            window_secs: 3,
+        },
+    ));
 
     let start = Instant::now();
     let mut handles = vec![];

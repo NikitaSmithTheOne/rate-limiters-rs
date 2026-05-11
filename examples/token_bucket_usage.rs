@@ -3,11 +3,14 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::token_bucket::r#impl::RateLimiter;
-use rate_limiters::token_bucket::TokenBucket;
+use rate_limiters::token_bucket::{TokenBucket, TokenBucketConfig};
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = TokenBucket::new(5, 2);
+    let mut bucket = TokenBucket::new(TokenBucketConfig {
+        capacity: 5,
+        refill_rate: 2,
+    });
 
     for i in 0..100 {
         bucket.refresh();

@@ -3,6 +3,12 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 
 pub use crate::traits::{RateLimiter, RateLimiterShared};
 
+#[derive(Debug, Clone, Copy)]
+pub struct TokenBucketConfig {
+    pub capacity: u32,
+    pub refill_rate: u32,
+}
+
 pub struct TokenBucket {
     capacity: u32,
     tokens: u32,
@@ -11,11 +17,11 @@ pub struct TokenBucket {
 }
 
 impl TokenBucket {
-    pub fn new(capacity: u32, refill_rate: u32) -> Self {
+    pub fn new(config: TokenBucketConfig) -> Self {
         Self {
-            capacity,
-            tokens: capacity,
-            refill_rate,
+            capacity: config.capacity,
+            tokens: config.capacity,
+            refill_rate: config.refill_rate,
             last_refill: Instant::now(),
         }
     }
@@ -76,9 +82,9 @@ pub struct TokenBucketShared {
 }
 
 impl TokenBucketShared {
-    pub fn new(capacity: u32, refill_rate: u32) -> Self {
+    pub fn new(config: TokenBucketConfig) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(TokenBucket::new(capacity, refill_rate))),
+            inner: Arc::new(Mutex::new(TokenBucket::new(config))),
         }
     }
 }

@@ -3,11 +3,14 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::leaky_bucket::LeakyBucketShared;
+use rate_limiters::leaky_bucket::{LeakyBucketConfig, LeakyBucketShared};
 use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
-    let bucket = Arc::new(LeakyBucketShared::new(5, 3.0));
+    let bucket = Arc::new(LeakyBucketShared::new(LeakyBucketConfig {
+        capacity: 5,
+        leak_rate: 3.0,
+    }));
 
     let start = Instant::now();
     let mut handles = vec![];

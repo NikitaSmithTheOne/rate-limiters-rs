@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod sequential_tests {
-    use crate::sliding_window_counter::SlidingWindowCounter;
+    use crate::sliding_window_counter::{SlidingWindowCounter, SlidingWindowCounterConfig};
     use crate::token_bucket::r#impl::RateLimiter;
     use std::thread;
     use std::time::Duration;
@@ -14,7 +14,10 @@ mod sequential_tests {
                 .as_secs()
         };
 
-        let mut bucket = SlidingWindowCounter::new(10, 2);
+        let mut bucket = SlidingWindowCounter::new(SlidingWindowCounterConfig {
+            capacity: 10,
+            window_secs: 2,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -69,7 +72,10 @@ mod sequential_tests {
                 .as_secs()
         };
 
-        let mut bucket = SlidingWindowCounter::new(10, 3);
+        let mut bucket = SlidingWindowCounter::new(SlidingWindowCounterConfig {
+            capacity: 10,
+            window_secs: 3,
+        });
         assert!(bucket.try_acquire(5));
         let initial_reset = bucket.get_reset();
         let initial_now = now_unix();

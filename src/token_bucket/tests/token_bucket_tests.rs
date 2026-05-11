@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod sequential_tests {
     use crate::token_bucket::r#impl::RateLimiter;
-    use crate::token_bucket::TokenBucket;
+    use crate::token_bucket::{TokenBucket, TokenBucketConfig};
     use std::thread;
     use std::time::Duration;
 
@@ -12,7 +12,10 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let mut bucket = TokenBucket::new(10, 1);
+        let mut bucket = TokenBucket::new(TokenBucketConfig {
+            capacity: 10,
+            refill_rate: 1,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -57,7 +60,10 @@ mod sequential_tests {
         // Regression: refresh() used to set last_refill = now, discarding the
         // sub-token fraction of elapsed time. Over many sub-tick refreshes the
         // effective refill rate fell well below the configured rate.
-        let mut bucket = TokenBucket::new(20, 1);
+        let mut bucket = TokenBucket::new(TokenBucketConfig {
+            capacity: 20,
+            refill_rate: 1,
+        });
         assert!(bucket.try_acquire(20)); // drain
         assert_eq!(bucket.get_remaining(), 0);
 
@@ -77,7 +83,10 @@ mod sequential_tests {
 
     #[test]
     fn zero_refill_rate_never_resets() {
-        let mut bucket = TokenBucket::new(3, 0);
+        let mut bucket = TokenBucket::new(TokenBucketConfig {
+            capacity: 3,
+            refill_rate: 0,
+        });
         assert!(bucket.try_acquire(3));
         assert!(!bucket.try_acquire(1));
         bucket.refresh();

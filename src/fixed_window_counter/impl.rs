@@ -3,6 +3,12 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 
 use crate::traits::{RateLimiter, RateLimiterShared};
 
+#[derive(Debug, Clone, Copy)]
+pub struct FixedWindowCounterConfig {
+    pub limit: u32,
+    pub window_secs: u64,
+}
+
 // *** FIXED WINDOW COUNTER ***
 pub struct FixedWindowCounter {
     limit: u32,
@@ -12,11 +18,11 @@ pub struct FixedWindowCounter {
 }
 
 impl FixedWindowCounter {
-    pub fn new(limit: u32, window_secs: u64) -> Self {
+    pub fn new(config: FixedWindowCounterConfig) -> Self {
         Self {
-            limit,
-            remaining: limit,
-            window: Duration::from_secs(window_secs),
+            limit: config.limit,
+            remaining: config.limit,
+            window: Duration::from_secs(config.window_secs),
             last_reset: Instant::now(),
         }
     }
@@ -74,9 +80,9 @@ pub struct FixedWindowCounterShared {
 }
 
 impl FixedWindowCounterShared {
-    pub fn new(limit: u32, window_secs: u64) -> Self {
+    pub fn new(config: FixedWindowCounterConfig) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(FixedWindowCounter::new(limit, window_secs))),
+            inner: Arc::new(Mutex::new(FixedWindowCounter::new(config))),
         }
     }
 }

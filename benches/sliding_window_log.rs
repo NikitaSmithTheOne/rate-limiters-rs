@@ -3,7 +3,9 @@ use std::sync::Arc;
 use std::thread;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use rate_limiters::sliding_window_log::{SlidingWindowLog, SlidingWindowLogShared};
+use rate_limiters::sliding_window_log::{
+    SlidingWindowLog, SlidingWindowLogConfig, SlidingWindowLogShared,
+};
 use rate_limiters::traits::{RateLimiter, RateLimiterShared};
 
 fn bench_try_acquire_success(c: &mut Criterion) {
@@ -12,7 +14,10 @@ fn bench_try_acquire_success(c: &mut Criterion) {
     group.bench_function("single_token", |b| {
         // window=0 means cleanup pops every entry on each call, so the log
         // never grows past one entry — bounded memory + always-success path.
-        let mut limiter = SlidingWindowLog::new(u32::MAX, 0);
+        let mut limiter = SlidingWindowLog::new(SlidingWindowLogConfig {
+            capacity: u32::MAX,
+            window_secs: 0,
+        });
         b.iter(|| black_box(limiter.try_acquire(black_box(1))));
     });
     group.finish();
@@ -22,7 +27,10 @@ fn bench_try_acquire_rejected(c: &mut Criterion) {
     let mut group = c.benchmark_group("SlidingWindowLog/try_acquire_rejected");
     group.throughput(Throughput::Elements(1));
     group.bench_function("full_log", |b| {
-        let mut limiter = SlidingWindowLog::new(0, 60);
+        let mut limiter = SlidingWindowLog::new(SlidingWindowLogConfig {
+            capacity: 0,
+            window_secs: 60,
+        });
         b.iter(|| black_box(limiter.try_acquire(black_box(1))));
     });
     group.finish();
@@ -35,7 +43,10 @@ fn bench_refresh(c: &mut Criterion) {
             BenchmarkId::from_parameter(window),
             &window,
             |b, &window| {
-                let mut limiter = SlidingWindowLog::new(u32::MAX, window);
+                let mut limiter = SlidingWindowLog::new(SlidingWindowLogConfig {
+                    capacity: u32::MAX,
+                    window_secs: window,
+                });
                 b.iter(|| {
                     limiter.refresh();
                     black_box(&limiter);
@@ -49,7 +60,10 @@ fn bench_refresh(c: &mut Criterion) {
 fn bench_getters(c: &mut Criterion) {
     let mut group = c.benchmark_group("SlidingWindowLog/getters");
     let limiter = {
-        let mut l = SlidingWindowLog::new(1_000, 60);
+        let mut l = SlidingWindowLog::new(SlidingWindowLogConfig {
+            capacity: 1_000,
+            window_secs: 60,
+        });
         l.try_acquire(250);
         l
     };
@@ -66,7 +80,10 @@ fn bench_shared_uncontended(c: &mut Criterion) {
     let mut group = c.benchmark_group("SlidingWindowLogShared/uncontended");
     group.throughput(Throughput::Elements(1));
     group.bench_function("try_acquire", |b| {
-        let limiter = SlidingWindowLogShared::new(u32::MAX, 0);
+        let limiter = SlidingWindowLogShared::new(SlidingWindowLogConfig {
+            capacity: u32::MAX,
+            window_secs: 0,
+        });
         b.iter(|| black_box(limiter.try_acquire(black_box(1))));
     });
     group.finish();
@@ -81,7 +98,10 @@ fn bench_shared_contended(c: &mut Criterion) {
             &threads,
             |b, &threads| {
                 b.iter_custom(|iters| {
-                    let limiter = Arc::new(SlidingWindowLogShared::new(u32::MAX, 0));
+                    let limiter = Arc::new(SlidingWindowLogShared::new(SlidingWindowLogConfig {
+                        capacity: u32::MAX,
+                        window_secs: 0,
+                    }));
                     let start = std::time::Instant::now();
                     let handles: Vec<_> = (0..threads)
                         .map(|_| {

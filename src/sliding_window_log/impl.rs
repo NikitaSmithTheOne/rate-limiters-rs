@@ -4,6 +4,12 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use crate::traits::{RateLimiter, RateLimiterShared};
 
+#[derive(Debug, Clone, Copy)]
+pub struct SlidingWindowLogConfig {
+    pub capacity: u32,
+    pub window_secs: u64,
+}
+
 // *** SLIDING WINDOW LOG ***
 pub struct SlidingWindowLog {
     capacity: u32,
@@ -12,10 +18,10 @@ pub struct SlidingWindowLog {
 }
 
 impl SlidingWindowLog {
-    pub fn new(capacity: u32, window_secs: u64) -> Self {
+    pub fn new(config: SlidingWindowLogConfig) -> Self {
         Self {
-            capacity,
-            window: Duration::from_secs(window_secs),
+            capacity: config.capacity,
+            window: Duration::from_secs(config.window_secs),
             log: VecDeque::new(),
         }
     }
@@ -89,9 +95,9 @@ pub struct SlidingWindowLogShared {
 }
 
 impl SlidingWindowLogShared {
-    pub fn new(capacity: u32, window_secs: u64) -> Self {
+    pub fn new(config: SlidingWindowLogConfig) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(SlidingWindowLog::new(capacity, window_secs))),
+            inner: Arc::new(Mutex::new(SlidingWindowLog::new(config))),
         }
     }
 }

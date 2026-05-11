@@ -4,6 +4,12 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::traits::{RateLimiter, RateLimiterShared};
 
+#[derive(Debug, Clone, Copy)]
+pub struct SlidingWindowCounterConfig {
+    pub capacity: u32,
+    pub window_secs: u64,
+}
+
 /// *** SLIDING WINDOW COUNTER ***
 pub struct SlidingWindowCounter {
     capacity: u32,
@@ -14,13 +20,13 @@ pub struct SlidingWindowCounter {
 }
 
 impl SlidingWindowCounter {
-    pub fn new(capacity: u32, window_secs: u64) -> Self {
-        let window_secs = window_secs.max(1);
+    pub fn new(config: SlidingWindowCounterConfig) -> Self {
+        let window_secs = config.window_secs.max(1);
         let tick = Duration::from_secs(1);
         let slot_count = window_secs as usize;
 
         Self {
-            capacity,
+            capacity: config.capacity,
             tick,
             slots: VecDeque::from(vec![0; slot_count]),
             used: 0,
@@ -128,9 +134,9 @@ pub struct SlidingWindowCounterShared {
 }
 
 impl SlidingWindowCounterShared {
-    pub fn new(capacity: u32, window_secs: u64) -> Self {
+    pub fn new(config: SlidingWindowCounterConfig) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(SlidingWindowCounter::new(capacity, window_secs))),
+            inner: Arc::new(Mutex::new(SlidingWindowCounter::new(config))),
         }
     }
 }

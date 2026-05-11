@@ -3,6 +3,12 @@ use std::time::{Duration, Instant, UNIX_EPOCH};
 
 use crate::traits::{RateLimiter, RateLimiterShared};
 
+#[derive(Debug, Clone, Copy)]
+pub struct LeakyBucketConfig {
+    pub capacity: u32,
+    pub leak_rate: f64,
+}
+
 // *** LEAKY BUCKET ***
 pub struct LeakyBucket {
     capacity: u32,
@@ -12,10 +18,10 @@ pub struct LeakyBucket {
 }
 
 impl LeakyBucket {
-    pub fn new(capacity: u32, leak_rate: f64) -> Self {
+    pub fn new(config: LeakyBucketConfig) -> Self {
         Self {
-            capacity,
-            leak_rate,
+            capacity: config.capacity,
+            leak_rate: config.leak_rate,
             water: 0.0,
             last_check: Instant::now(),
         }
@@ -73,9 +79,9 @@ pub struct LeakyBucketShared {
 }
 
 impl LeakyBucketShared {
-    pub fn new(capacity: u32, leak_rate: f64) -> Self {
+    pub fn new(config: LeakyBucketConfig) -> Self {
         Self {
-            inner: Arc::new(Mutex::new(LeakyBucket::new(capacity, leak_rate))),
+            inner: Arc::new(Mutex::new(LeakyBucket::new(config))),
         }
     }
 }

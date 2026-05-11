@@ -3,11 +3,14 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::sliding_window_log::SlidingWindowLogShared;
+use rate_limiters::sliding_window_log::{SlidingWindowLogConfig, SlidingWindowLogShared};
 use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
-    let bucket = Arc::new(SlidingWindowLogShared::new(5, 1));
+    let bucket = Arc::new(SlidingWindowLogShared::new(SlidingWindowLogConfig {
+        capacity: 5,
+        window_secs: 1,
+    }));
 
     let start = Instant::now();
     let mut handles = vec![];

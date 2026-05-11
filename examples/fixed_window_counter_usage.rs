@@ -2,12 +2,15 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::fixed_window_counter::FixedWindowCounter;
+use rate_limiters::fixed_window_counter::{FixedWindowCounter, FixedWindowCounterConfig};
 use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = FixedWindowCounter::new(5, 2);
+    let mut bucket = FixedWindowCounter::new(FixedWindowCounterConfig {
+        limit: 5,
+        window_secs: 2,
+    });
 
     for i in 0..100 {
         bucket.refresh();

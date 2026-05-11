@@ -2,12 +2,15 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::sliding_window_counter::SlidingWindowCounter;
+use rate_limiters::sliding_window_counter::{SlidingWindowCounter, SlidingWindowCounterConfig};
 use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = SlidingWindowCounter::new(10, 5);
+    let mut bucket = SlidingWindowCounter::new(SlidingWindowCounterConfig {
+        capacity: 10,
+        window_secs: 5,
+    });
 
     for i in 0..100 {
         bucket.refresh();

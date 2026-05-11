@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::thread;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use rate_limiters::leaky_bucket::{LeakyBucket, LeakyBucketShared};
+use rate_limiters::leaky_bucket::{LeakyBucket, LeakyBucketConfig, LeakyBucketShared};
 use rate_limiters::traits::{RateLimiter, RateLimiterShared};
 
 fn bench_try_acquire_success(c: &mut Criterion) {
@@ -11,7 +11,10 @@ fn bench_try_acquire_success(c: &mut Criterion) {
     group.throughput(Throughput::Elements(1));
     group.bench_function("single_token", |b| {
         // Effectively unlimited capacity + fast leak so each call succeeds.
-        let mut bucket = LeakyBucket::new(u32::MAX, 1e12);
+        let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+            capacity: u32::MAX,
+            leak_rate: 1e12,
+        });
         b.iter(|| black_box(bucket.try_acquire(black_box(1))));
     });
     group.finish();
@@ -22,7 +25,10 @@ fn bench_try_acquire_rejected(c: &mut Criterion) {
     group.throughput(Throughput::Elements(1));
     group.bench_function("full_bucket", |b| {
         // Zero capacity + zero leak rate guarantees rejection.
-        let mut bucket = LeakyBucket::new(0, 0.0);
+        let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+            capacity: 0,
+            leak_rate: 0.0,
+        });
         b.iter(|| black_box(bucket.try_acquire(black_box(1))));
     });
     group.finish();
@@ -35,7 +41,10 @@ fn bench_refresh(c: &mut Criterion) {
             BenchmarkId::from_parameter(rate as u64),
             &rate,
             |b, &rate| {
-                let mut bucket = LeakyBucket::new(u32::MAX, rate);
+                let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+                    capacity: u32::MAX,
+                    leak_rate: rate,
+                });
                 b.iter(|| {
                     bucket.refresh();
                     black_box(&bucket);
@@ -49,7 +58,10 @@ fn bench_refresh(c: &mut Criterion) {
 fn bench_getters(c: &mut Criterion) {
     let mut group = c.benchmark_group("LeakyBucket/getters");
     let bucket = {
-        let mut b = LeakyBucket::new(1_000, 100.0);
+        let mut b = LeakyBucket::new(LeakyBucketConfig {
+            capacity: 1_000,
+            leak_rate: 100.0,
+        });
         b.try_acquire(250);
         b
     };
@@ -66,7 +78,10 @@ fn bench_shared_uncontended(c: &mut Criterion) {
     let mut group = c.benchmark_group("LeakyBucketShared/uncontended");
     group.throughput(Throughput::Elements(1));
     group.bench_function("try_acquire", |b| {
-        let bucket = LeakyBucketShared::new(u32::MAX, 1e12);
+        let bucket = LeakyBucketShared::new(LeakyBucketConfig {
+            capacity: u32::MAX,
+            leak_rate: 1e12,
+        });
         b.iter(|| black_box(bucket.try_acquire(black_box(1))));
     });
     group.finish();
@@ -81,7 +96,10 @@ fn bench_shared_contended(c: &mut Criterion) {
             &threads,
             |b, &threads| {
                 b.iter_custom(|iters| {
-                    let bucket = Arc::new(LeakyBucketShared::new(u32::MAX, 1e12));
+                    let bucket = Arc::new(LeakyBucketShared::new(LeakyBucketConfig {
+                        capacity: u32::MAX,
+                        leak_rate: 1e12,
+                    }));
                     let start = std::time::Instant::now();
                     let handles: Vec<_> = (0..threads)
                         .map(|_| {

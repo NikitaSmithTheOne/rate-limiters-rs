@@ -3,11 +3,14 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::fixed_window_counter::FixedWindowCounterShared;
+use rate_limiters::fixed_window_counter::{FixedWindowCounterConfig, FixedWindowCounterShared};
 use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 
 fn main() {
-    let bucket = Arc::new(FixedWindowCounterShared::new(10, 2));
+    let bucket = Arc::new(FixedWindowCounterShared::new(FixedWindowCounterConfig {
+        limit: 10,
+        window_secs: 2,
+    }));
 
     let start = Instant::now();
     let mut handles = vec![];

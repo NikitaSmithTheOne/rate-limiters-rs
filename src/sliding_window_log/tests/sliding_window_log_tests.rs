@@ -3,7 +3,7 @@ mod sequential_tests {
     use std::thread;
     use std::time::Duration;
 
-    use crate::sliding_window_log::SlidingWindowLog;
+    use crate::sliding_window_log::{SlidingWindowLog, SlidingWindowLogConfig};
     use crate::token_bucket::r#impl::RateLimiter;
 
     #[test]
@@ -13,7 +13,10 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let mut bucket = SlidingWindowLog::new(10, 2);
+        let mut bucket = SlidingWindowLog::new(SlidingWindowLogConfig {
+            capacity: 10,
+            window_secs: 2,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -55,7 +58,10 @@ mod sequential_tests {
         // Regression: get_reset() used to return `oldest + window` even when
         // the oldest entries had aged past the window — yielding a timestamp
         // in the past. It now skips stale entries inline.
-        let mut bucket = SlidingWindowLog::new(5, 2);
+        let mut bucket = SlidingWindowLog::new(SlidingWindowLogConfig {
+            capacity: 5,
+            window_secs: 2,
+        });
         assert!(bucket.try_acquire(3));
 
         thread::sleep(Duration::from_secs(3));

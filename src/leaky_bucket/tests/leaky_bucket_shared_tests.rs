@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod sequential_tests {
-    use crate::leaky_bucket::LeakyBucketShared;
+    use crate::leaky_bucket::{LeakyBucketConfig, LeakyBucketShared};
     use crate::token_bucket::r#impl::RateLimiterShared;
     use std::thread;
     use std::time::Duration;
@@ -12,7 +12,10 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let bucket = LeakyBucketShared::new(10, 1.0);
+        let bucket = LeakyBucketShared::new(LeakyBucketConfig {
+            capacity: 10,
+            leak_rate: 1.0,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -54,7 +57,10 @@ mod sequential_tests {
 
     #[test]
     fn zero_leak_rate_never_resets() {
-        let bucket = LeakyBucketShared::new(3, 0.0);
+        let bucket = LeakyBucketShared::new(LeakyBucketConfig {
+            capacity: 3,
+            leak_rate: 0.0,
+        });
         assert!(bucket.try_acquire(3));
         assert!(!bucket.try_acquire(1));
         bucket.refresh();
@@ -72,7 +78,7 @@ mod sequential_tests {
 
 #[cfg(test)]
 mod parallel_tests {
-    use crate::leaky_bucket::LeakyBucketShared;
+    use crate::leaky_bucket::{LeakyBucketConfig, LeakyBucketShared};
     use crate::token_bucket::r#impl::RateLimiterShared;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Barrier};
@@ -81,7 +87,10 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_test() {
-        let bucket = Arc::new(LeakyBucketShared::new(10, 1.0));
+        let bucket = Arc::new(LeakyBucketShared::new(LeakyBucketConfig {
+            capacity: 10,
+            leak_rate: 1.0,
+        }));
         let success_count = Arc::new(AtomicU32::new(0));
         let barrier = Arc::new(Barrier::new(21));
 

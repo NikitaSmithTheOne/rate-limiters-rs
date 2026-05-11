@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod sequential_tests {
-    use crate::fixed_window_counter::FixedWindowCounterShared;
+    use crate::fixed_window_counter::{FixedWindowCounterConfig, FixedWindowCounterShared};
     use crate::token_bucket::r#impl::RateLimiterShared;
     use std::thread;
     use std::time::Duration;
@@ -12,7 +12,10 @@ mod sequential_tests {
             .unwrap()
             .as_secs();
 
-        let bucket = FixedWindowCounterShared::new(10, 2);
+        let bucket = FixedWindowCounterShared::new(FixedWindowCounterConfig {
+            limit: 10,
+            window_secs: 2,
+        });
         assert_eq!(bucket.get_limit(), 10);
         assert_eq!(bucket.get_remaining(), 10);
         assert_eq!(bucket.get_used(), 0);
@@ -51,7 +54,7 @@ mod sequential_tests {
 
 #[cfg(test)]
 mod parallel_tests {
-    use crate::fixed_window_counter::FixedWindowCounterShared;
+    use crate::fixed_window_counter::{FixedWindowCounterConfig, FixedWindowCounterShared};
     use crate::token_bucket::r#impl::RateLimiterShared;
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Barrier};
@@ -60,7 +63,10 @@ mod parallel_tests {
 
     #[test]
     fn race_condition_test() {
-        let bucket = Arc::new(FixedWindowCounterShared::new(10, 1));
+        let bucket = Arc::new(FixedWindowCounterShared::new(FixedWindowCounterConfig {
+            limit: 10,
+            window_secs: 1,
+        }));
         let success_count = Arc::new(AtomicU32::new(0));
         let barrier = Arc::new(Barrier::new(21));
 

@@ -2,12 +2,15 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::leaky_bucket::LeakyBucket;
+use rate_limiters::leaky_bucket::{LeakyBucket, LeakyBucketConfig};
 use rate_limiters::token_bucket::r#impl::RateLimiter;
 
 fn main() {
     let start = Instant::now();
-    let mut bucket = LeakyBucket::new(10, 1.0);
+    let mut bucket = LeakyBucket::new(LeakyBucketConfig {
+        capacity: 10,
+        leak_rate: 1.0,
+    });
 
     for i in 0..100 {
         bucket.refresh();
