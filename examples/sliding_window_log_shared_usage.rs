@@ -1,10 +1,10 @@
-// cargo run --example sliding_window_log_usage
+// cargo run --example sliding_window_log_shared_usage
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::sliding_window_log::{SlidingWindowLogConfig, SlidingWindowLogShared};
-use rate_limiters::token_bucket::r#impl::RateLimiterShared;
+use rate_limiters::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(SlidingWindowLogShared::new(SlidingWindowLogConfig {

@@ -3,8 +3,8 @@ use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::token_bucket::r#impl::RateLimiterShared;
 use rate_limiters::token_bucket::{TokenBucketConfig, TokenBucketShared};
+use rate_limiters::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(TokenBucketShared::new(TokenBucketConfig {

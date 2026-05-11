@@ -90,11 +90,11 @@ cargo add rate_limiters
 
 ## Пример `Leaky Bucket`
 
-```rs
+```rust
 use std::thread;
 use std::time::{Duration, Instant};
 
-use rate_limiters::leaky_bucket::LeakyBucket;
+use rate_limiters::leaky_bucket::{LeakyBucket, LeakyBucketConfig};
 use rate_limiters::RateLimiter;
 
 fn main() {

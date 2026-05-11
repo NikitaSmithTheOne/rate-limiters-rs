@@ -1,10 +1,10 @@
-// cargo run --example leaky_bucket_shared_usage
+// cargo run --example fixed_window_counter_shared_usage
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::fixed_window_counter::{FixedWindowCounterConfig, FixedWindowCounterShared};
-use rate_limiters::token_bucket::r#impl::RateLimiterShared;
+use rate_limiters::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(FixedWindowCounterShared::new(FixedWindowCounterConfig {

@@ -6,7 +6,7 @@ use std::time::{Duration, Instant};
 use rate_limiters::sliding_window_counter::{
     SlidingWindowCounterConfig, SlidingWindowCounterShared,
 };
-use rate_limiters::token_bucket::r#impl::RateLimiterShared;
+use rate_limiters::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(SlidingWindowCounterShared::new(

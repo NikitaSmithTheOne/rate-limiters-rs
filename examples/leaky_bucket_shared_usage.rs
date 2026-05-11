@@ -4,7 +4,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::leaky_bucket::{LeakyBucketConfig, LeakyBucketShared};
-use rate_limiters::token_bucket::r#impl::RateLimiterShared;
+use rate_limiters::RateLimiterShared;
 
 fn main() {
     let bucket = Arc::new(LeakyBucketShared::new(LeakyBucketConfig {
@@ -33,7 +33,7 @@ fn main() {
                     );
                 } else {
                     denied += 1;
-                    bucket_clone.refresh(); // <-- It's must to get reset value w/ "jumping"
+                    bucket_clone.refresh(); // <-- Required to refresh the reset value w/ "jumping"
                     println!(
                         "[{elapsed:5.2}s] Client #{client_id} - Request #{req_id} - Rejected - Reset UNIX {}",
                         bucket_clone.get_reset()

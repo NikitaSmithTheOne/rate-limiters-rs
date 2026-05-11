@@ -3,7 +3,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::sliding_window_log::{SlidingWindowLog, SlidingWindowLogConfig};
-use rate_limiters::token_bucket::r#impl::RateLimiter;
+use rate_limiters::RateLimiter;
 
 fn main() {
     let start = Instant::now();

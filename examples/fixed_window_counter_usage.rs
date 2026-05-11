@@ -1,9 +1,9 @@
-// cargo run --example token_bucket_usage
+// cargo run --example fixed_window_counter_usage
 use std::thread;
 use std::time::{Duration, Instant};
 
 use rate_limiters::fixed_window_counter::{FixedWindowCounter, FixedWindowCounterConfig};
-use rate_limiters::token_bucket::r#impl::RateLimiter;
+use rate_limiters::RateLimiter;
 
 fn main() {
     let start = Instant::now();
